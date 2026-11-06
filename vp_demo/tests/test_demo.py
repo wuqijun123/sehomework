@@ -163,6 +163,27 @@ class HttpTests(unittest.TestCase):
         gc.collect()
         cls.tmp.cleanup()
 
+    def test_vben_static_assets_and_path_boundary(self):
+        ui = server.ROOT / 'static' / 'ui'
+        if not (ui / 'index.html').is_file():
+            self.skipTest('Vben build not present')
+        workspace = (ui / 'workspace/app.js').read_text(encoding='utf-8')
+        self.assertIn(f'health.apiVersion!=={server.API_VERSION})', workspace,
+                      'Rebuild the published workspace when the API version changes')
+        client = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        for path, content_type in [('/', 'text/html'), ('/workspace/app.js', 'javascript'),
+                                   ('/workspace/theme.css', 'text/css'), ('/vp-logo.svg', 'image/svg+xml')]:
+            with client.open(self.base + path) as response:
+                self.assertEqual(response.status, 200)
+                self.assertIn(content_type, response.headers['Content-Type'])
+                self.assertTrue(response.read())
+                self.assertIn("script-src 'self'", response.headers['Content-Security-Policy'])
+        with self.assertRaises(urllib.error.HTTPError) as caught:
+            client.open(self.base + '/../../../server.py')
+        self.assertIn(caught.exception.code, (401, 404))
+        with client.open(self.base + '/api/health') as response:
+            self.assertEqual(json.load(response)['app'], 'vplab')
+
     def client(self, name):
         client = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
         self.request(client, "/api/register", {"username": name, "password": "test-password-42"})
