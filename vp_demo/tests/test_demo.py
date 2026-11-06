@@ -167,6 +167,9 @@ class HttpTests(unittest.TestCase):
         ui = server.ROOT / 'static' / 'ui'
         if not (ui / 'index.html').is_file():
             self.skipTest('Vben build not present')
+        workspace = (ui / 'workspace/app.js').read_text(encoding='utf-8')
+        self.assertIn(f'health.apiVersion!=={server.API_VERSION})', workspace,
+                      'Rebuild the published workspace when the API version changes')
         client = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         for path, content_type in [('/', 'text/html'), ('/workspace/app.js', 'javascript'),
                                    ('/workspace/theme.css', 'text/css'), ('/vp-logo.svg', 'image/svg+xml')]:

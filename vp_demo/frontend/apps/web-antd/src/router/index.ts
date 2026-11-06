@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import { LayoutGrid, SquareCode, Copy, ListOrdered, ArrowRightLeft, BookOpenText, SquareCheckBig, InspectionPanel, Grid, Settings } from '@vben/icons';
 import Layout from '#/layouts/basic.vue';
 import Workspace from '#/views/vplab/workspace.vue';
+import { normalizeLegacyTab } from './legacy-route';
 const destinations = [
   { name: 'overview', title: '训练概览', icon: LayoutGrid },
   { name: 'training', title: '日常训练', icon: SquareCode },
@@ -17,6 +18,10 @@ const destinations = [
   { name: 'settings', title: '数据与账号', icon: Settings },
 ];
 export const menus = destinations.map(({ name, title, icon }) => ({ name: title, path: `/${name}`, icon: markRaw(icon) }));
+const initialUrl = normalizeLegacyTab(new URL(window.location.href), destinations.map(({ name }) => name));
+if (initialUrl.href !== window.location.href) {
+  window.history.replaceState(window.history.state, '', initialUrl.href);
+}
 export const router = createRouter({
   history: createWebHashHistory(),
   routes: [{ path: '/', component: Layout, redirect: '/overview', children: destinations.map(({ name, title, icon }) => ({

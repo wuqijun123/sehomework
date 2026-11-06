@@ -37,7 +37,7 @@ from editorial_service import EditorialService
 from smart_recommendation import SmartRecommendationService
 
 ROOT = Path(__file__).resolve().parent
-API_VERSION = 17
+API_VERSION = 18
 DB = Path(os.environ.get("VPLAB_DB", str(ROOT / ".local" / "vplab.sqlite3")))
 SAMPLE = Path(os.environ.get("VPLAB_SAMPLE", "E:/codeforces_submissions.jsonl"))
 SESSIONS = {}

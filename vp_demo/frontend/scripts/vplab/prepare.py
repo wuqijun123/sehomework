@@ -2,7 +2,10 @@
 from pathlib import Path
 import re, shutil
 root=Path(__file__).resolve().parents[3]
-public=root/'frontend/apps/web-antd/public'
+app=root/'frontend/apps/web-antd'
+if not (app/'.env').exists():
+ shutil.copyfile(app/'.env.example',app/'.env')
+public=app/'public'
 out=public/'workspace';out.mkdir(parents=True,exist_ok=True)
 static=root/'static'
 html=(static/'index.html').read_text().split('<body>',1)[1].split('</body>',1)[0]
